@@ -48,8 +48,8 @@ def whoWin(oneVStwo, home, away, nb_game_played, G):
     # print("DRAW between", home, "and", away, "\t", draw, "\t", draw_percent)
         getPoint(team1_percent_win, team2_percent_win, draw_percent, home, away, G)
     except:
-        G[home] = 0
-        G[away] = 0
+        G[home] = G[home]
+        G[away] = G[away]
 
 def how_many_times_one_team_played_another(home, away, G):
     oneVStwo = data[((data['home_team'] == home) & (data['away_team'] == away)) | ((data['home_team'] == away) & (data['away_team'] == home))].iloc[0:, :19]
