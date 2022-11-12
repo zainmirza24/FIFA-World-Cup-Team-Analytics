@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 from math import *
 from collections import Counter
+import matplotlib.pyplot as plt
 
 file = "../doc/sport/fifa_world_cup.csv"
 data = pd.read_csv(file)
@@ -110,8 +111,8 @@ def Home_or_Away():
     print("The away team have:", lose, "% chances to win")
     print("There is", draw, "% chances to have a draw")
 
-def who_win_the_most(c, team, score):
-    global data
+def who_win_the_most(c, team, score, data):
+#    global data
     win = []
     for i in c:
         win.append(len(data[(data[team] == i) & (data['home_team_result'] == score)]))
@@ -121,26 +122,88 @@ def who_win_the_most(c, team, score):
         if m == i:
             j = idx
     tot_game = len(data[data[team] == c[j]])
-    if team == 'home_team':
-        print("The team who won the most of match is:", c[j], "with", m, "victory at Home which is", m/tot_game*100, "% victory")
-    if team == 'away_team':
-        print("The team who won the most of match is:", c[j], "with", m, "victory Away which is", m/tot_game*100, "% victory")
+    # if team == 'home_team':
+    #     print("The team who won the most of match is:", c[j], "with", m, "victory at Home which is", m/tot_game*100, "% victory")
+    # if team == 'away_team':
+    #     print("The team who won the most of match is:", c[j], "with", m, "victory Away which is", m/tot_game*100, "% victory")
     return win
 
 
-def best_country(c):
-    win_h = who_win_the_most(c, 'home_team', "Win")
-    win_a = who_win_the_most(c, 'away_team', "Lose")
+def best_country(c, data):
+    win_h = who_win_the_most(c, 'home_team', "Win", data)
+    win_a = who_win_the_most(c, 'away_team', "Lose", data)
+    lose_h = who_win_the_most(c, 'home_team', "Lose", data)
+    lose_a = who_win_the_most(c, 'away_team', "Win", data)
+    draw_h = who_win_the_most(c, 'home_team', "Draw", data)
+    draw_a = who_win_the_most(c, 'away_team', "Draw", data)
     win = []
+    lose = []
+    draw = []
     for idx, i in enumerate(win_h):
         win.append(i + win_a[idx])
+        lose.append(lose_h[idx] + lose_a[idx])
+        draw.append(draw_h[idx] + draw_a[idx])
     m = max(win)
     j = 0
     for idx, i in enumerate(win):
         if m == i:
             j = idx
     tot_game = len(data[(data['home_team'] == c[j]) | (data['away_team'] == c[j])])
-    print("The team who won the most of match is:", c[j], "with", m, "victory Overall which is", m/tot_game*100, "% victory")
+#    print("The team who won the most of match is:", c[j], "with", m, "victory Overall which is", m/tot_game*100, "% victory")
+    return win, lose, draw
+
+def data_for_a_certain_y(y, data):
+#    global data
+    for idx, d in enumerate(data["date"]):
+        if str(2022-y) == d[:4]:
+            pastYearsData = data.iloc[1+idx:, 0:]
+    print(pastYearsData)
+    return pastYearsData
+
+def new_df(c, w, l, d, df, bl, y):
+    percent_w = []
+    percent_l = []
+    percent_d = []
+    tot = []
+    for idx, i in enumerate(c):
+        tot.append(w[idx]+l[idx]+d[idx])
+        try:
+            percent_w.append(w[idx]/(tot[idx])*100)
+            percent_l.append(l[idx]/(tot[idx])*100)
+            percent_d.append(d[idx]/(tot[idx])*100)
+        except:
+            percent_w.append("NaN")
+            percent_l.append("NaN")
+            percent_d.append("NaN")
+    if bl == False:
+        data2 = {'TEAM': c,
+        'WIN': w,
+        'LOSE': l,
+        'DRAW': d,
+        'PLAY': tot
+#            '% WIN': percent_w, '% LOSE': percent_l, '% DRAW': percent_d
+        }
+        df = pd.DataFrame(data2)
+    else:
+        df["last " + str(y) + "y WIN"] = w
+        df["last " + str(y) + "y LOSE"] = l
+        df["last " + str(y) + "y DRAW"] = d
+        df["last " + str(y) + "y PLAY"] = tot
+        # df["last " + str(y) + "y % WIN"] = percent_w
+        # df["last " + str(y) + "y % LOSE"] = percent_l
+        # df["last " + str(y) + "y % DRAW"] = percent_d
+    return df
+
+GroupA = {"Qatar":0, "Ecuador":0, "Senegal":0, "Netherlands":0}
+GroupB = {"England":0, "IR Iran":0, "USA":0, "Wales":0}
+GroupC = {"Argentina":0, "Saudi Arabia":0, "Mexico":0, "Poland":0}
+GroupD = {"Australia":0, "France":0, "Denmark":0, "Tunisia":0}
+GroupE = {"Spain":0, "Germany":0, "Japan":0, "Costa Rica":0}
+GroupF = {"Belgium":0, "Canada":0, "Morocco":0, "Croatia":0}
+GroupG = {"Brazil":0, "Serbia":0, "Switzerland":0, "Cameroon":0}
+GroupH = {"Portugal":0, "Ghana":0, "Uruguay":0, "Korea Republic":0}
+
+GROUP = [GroupA, GroupB, GroupC, GroupD, GroupE, GroupF, GroupG, GroupH]
 
 def main():
     print()
@@ -149,8 +212,61 @@ def main():
     clean_sheet(c)
     Home_or_Away()
     print()
-    best_country(c)
-    
+    # for t in GROUP:
+    #     for tt in t:
+    #         WorldCupData = data[(data['home_team'] == tt) | (data['away_team'] == tt)]
+    # print("ONLY WORLD CUP TEAMS\n", WorldCupData)
+    w, l, d = best_country(c, data)
+    df = new_df(c, w, l, d, None, False, 0)
+    pastYearsData = data_for_a_certain_y(5, data)
+    p_w, p_l, p_d = best_country(c, pastYearsData)
+    df = new_df(c, p_w, p_l, p_d, df, True, 5)
+    pastYearsData = data_for_a_certain_y(2, data)
+    p_w, p_l, p_d = best_country(c, pastYearsData)
+    df = new_df(c, p_w, p_l, p_d, df, True, 2)
+    lst = list(df.iloc[0])
+    print(len(df))
+    pts_A = []
+    pts_N = []
+    for idx in range(0, len(df)):
+        lst = list(df.iloc[idx])
+#        print(lst[0], "\tAVERAGE", lst[5]*3+lst[7], "\tNOW", lst[9]*3+lst[11])
+        pts_A.append(((lst[5]*3+lst[7])/lst[8])*100)
+        pts_N.append(((lst[9]*3+lst[11])/lst[12])*100)
+#    df["Last pts"] = pts_A
+#    df["Now pts"] = pts_N
+    stats = []
+    s = []
+    for idx, i in enumerate(pts_A):
+        stats.append(pts_N[idx] / i)
+        s.append('Cold' if stats[idx] < 0.9 else 'Hot' if stats[idx] > 1.1 else 'Regular')
+#    df["stats"] = stats
+    df["strike"] = s
+    print(df)
+    # for t in GROUP:
+    #     for tt in t:
+    #         print(df[(df['TEAM'] == tt)])
+#    team = [float(df[df["TEAM"] == "France"]["last 5y % WIN"]), float(df[df["TEAM"] == "France"]["last 5y % LOSE"]), float(df[df["TEAM"] == "France"]["last 5y % DRAW"])]
+#    team2 = [float(df[df["TEAM"] == "France"]["last 2y % WIN"]), float(df[df["TEAM"] == "France"]["last 2y % LOSE"]), float(df[df["TEAM"] == "France"]["last 2y % DRAW"])]
+#    print(team)
+#    plt.bar(['win', 'lose', 'draw'], team)
+#    name = ['win', 'lose', 'draw']
+#    reuslt = []
+#    for idx, i in enumerate(team):
+#        reuslt.append(team2[idx]-i)
+#    plt.plot([0, 3], [0, 0])
+    # plt.bar(np.arange(len(name[0])), reuslt[0], 0.4, label = 'now', color='green')
+    # plt.bar(np.arange(len(name[1])), reuslt[1], 0.4, label = 'now', color='orange')
+    # plt.bar(np.arange(len(name[2])), reuslt[2], 0.4, label = 'now', color='red')
+    # plt.xticks(np.arange(len(name)), name)
+    # plt.legend()
+    # plt.show()
+    worldCup = []
+    for i in GROUP:
+        worldCup.append(df.loc[df['TEAM'].isin(i)])
+    worldCup = pd.concat(worldCup)
+    print(worldCup)
+
 
 if __name__ == "__main__":
     main()
