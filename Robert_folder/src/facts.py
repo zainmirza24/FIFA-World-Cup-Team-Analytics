@@ -205,6 +205,21 @@ GroupH = {"Portugal":0, "Ghana":0, "Uruguay":0, "Korea Republic":0}
 
 GROUP = [GroupA, GroupB, GroupC, GroupD, GroupE, GroupF, GroupG, GroupH]
 
+def rank(df):
+    r = data.loc[:len(data), ['home_team', 'away_team', 'home_team_fifa_rank', 'away_team_fifa_rank', 'home_team_result']]
+    bins = [0, 10, 30, 40, 70, 100, 211]
+    ranking = ["World class", "Really Good", "Average", "Bad", "Really Bad", "Worst"]
+    r["home ranking"] = pd.cut(x=data['home_team_fifa_rank'], bins=bins, labels=ranking)
+    r["away ranking"] = pd.cut(x=data['away_team_fifa_rank'], bins=bins, labels=ranking)
+    rr = r.loc[:len(r), ['home ranking', 'away ranking', 'home_team_result']]
+    for g1 in ranking:
+        for g2 in ranking:
+            game = rr[((rr["home ranking"] == g1) & (rr["away ranking"] == g2))]
+            nb_games = len(rr[((rr["home ranking"] == g1) & (rr["away ranking"] == g2))])
+            for g in ["Win", "Lose", "Draw"]:
+                print(g, g1, "against", g2, "\t", (len(game[game["home_team_result"] == g]) / nb_games * 100))
+            print()
+
 def main():
     print()
     c = who_scored_the_most_goals()
@@ -240,32 +255,17 @@ def main():
     for idx, i in enumerate(pts_A):
         stats.append(pts_N[idx] / i)
         s.append('Cold' if stats[idx] < 0.9 else 'Hot' if stats[idx] > 1.1 else 'Regular')
-#    df["stats"] = stats
     df["strike"] = s
     print(df)
-    # for t in GROUP:
-    #     for tt in t:
-    #         print(df[(df['TEAM'] == tt)])
-#    team = [float(df[df["TEAM"] == "France"]["last 5y % WIN"]), float(df[df["TEAM"] == "France"]["last 5y % LOSE"]), float(df[df["TEAM"] == "France"]["last 5y % DRAW"])]
-#    team2 = [float(df[df["TEAM"] == "France"]["last 2y % WIN"]), float(df[df["TEAM"] == "France"]["last 2y % LOSE"]), float(df[df["TEAM"] == "France"]["last 2y % DRAW"])]
-#    print(team)
-#    plt.bar(['win', 'lose', 'draw'], team)
-#    name = ['win', 'lose', 'draw']
-#    reuslt = []
-#    for idx, i in enumerate(team):
-#        reuslt.append(team2[idx]-i)
-#    plt.plot([0, 3], [0, 0])
-    # plt.bar(np.arange(len(name[0])), reuslt[0], 0.4, label = 'now', color='green')
-    # plt.bar(np.arange(len(name[1])), reuslt[1], 0.4, label = 'now', color='orange')
-    # plt.bar(np.arange(len(name[2])), reuslt[2], 0.4, label = 'now', color='red')
-    # plt.xticks(np.arange(len(name)), name)
-    # plt.legend()
-    # plt.show()
     worldCup = []
     for i in GROUP:
         worldCup.append(df.loc[df['TEAM'].isin(i)])
     worldCup = pd.concat(worldCup)
     print(worldCup)
+
+
+
+    rank(df)
 
 
 if __name__ == "__main__":
