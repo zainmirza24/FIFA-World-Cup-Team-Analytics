@@ -205,19 +205,24 @@ GroupH = {"Portugal":0, "Ghana":0, "Uruguay":0, "Korea Republic":0}
 
 GROUP = [GroupA, GroupB, GroupC, GroupD, GroupE, GroupF, GroupG, GroupH]
 
-def rank(df):
+def rank(team1 = None, team2 = None):
     r = data.loc[:len(data), ['home_team', 'away_team', 'home_team_fifa_rank', 'away_team_fifa_rank', 'home_team_result']]
     bins = [0, 10, 30, 40, 70, 100, 211]
     ranking = ["World class", "Really Good", "Average", "Bad", "Really Bad", "Worst"]
     r["home ranking"] = pd.cut(x=data['home_team_fifa_rank'], bins=bins, labels=ranking)
     r["away ranking"] = pd.cut(x=data['away_team_fifa_rank'], bins=bins, labels=ranking)
     rr = r.loc[:len(r), ['home ranking', 'away ranking', 'home_team_result']]
+    win_rate = []
     for g1 in ranking:
         for g2 in ranking:
             game = rr[((rr["home ranking"] == g1) & (rr["away ranking"] == g2))]
             nb_games = len(rr[((rr["home ranking"] == g1) & (rr["away ranking"] == g2))])
             for g in ["Win", "Lose", "Draw"]:
-                print(g, g1, "against", g2, "\t", (len(game[game["home_team_result"] == g]) / nb_games * 100))
+                if team1 != None and team2 != None and team1 == g1 and team2 == g2 or team1 == None and team2 == None:
+                    win_rate.append(len(game[game["home_team_result"] == g]) / nb_games * 100)
+                    print(g, "HOME:", g1, "against AWAY:", g2, "\t", (len(game[game["home_team_result"] == g]) / nb_games * 100))
+            if team1 != None and team2 != None and team1 == g1 and team2 == g2:
+                return win_rate
             print()
 
 def main():
@@ -265,7 +270,7 @@ def main():
 
 
 
-    rank(df)
+    print(rank("World class", "Bad"))
 
 
 if __name__ == "__main__":
