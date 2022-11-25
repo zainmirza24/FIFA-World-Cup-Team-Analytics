@@ -47,19 +47,19 @@ def max_goal(type):
             j_h = idx
         if most_goal_a[idx] == m_a:
             j_a = idx
-    if type == "sum":
-        print("Team that scored the most goals at Home is:", c[j_h], "with", m_h[0], "goals")
-        print("Team that scored the most goals Away is:", c[j_a], "with", m_a[0], "goals")
-        print("Team that scored the most goals Overall is:", c[j], "with", m, "goals")
-    if type == "mean":
-        print("Team that have the highest goals per match at Home is:", c[j_h], "with", m_h[0], "goals")
-        print("Team that have the highest goals per match Away is:", c[j_a], "with", m_a[0], "goals")
-        print("Team that have the highest goals per match overall is:", c[j], "with", m, "goals")
+    # if type == "sum":
+    #     print("Team that scored the most goals at Home is:", c[j_h], "with", m_h[0], "goals")
+    #     print("Team that scored the most goals Away is:", c[j_a], "with", m_a[0], "goals")
+    #     print("Team that scored the most goals Overall is:", c[j], "with", m, "goals")
+    # if type == "mean":
+    #     print("Team that have the highest goals per match at Home is:", c[j_h], "with", m_h[0], "goals")
+    #     print("Team that have the highest goals per match Away is:", c[j_a], "with", m_a[0], "goals")
+    #     print("Team that have the highest goals per match overall is:", c[j], "with", m, "goals")
     return c
 
 def who_scored_the_most_goals():
     c = max_goal("sum")
-    print()
+#    print()
     max_goal("mean")
     return c
 
@@ -73,12 +73,12 @@ def home_clean_sheet(home, team):
     t = max(a, key=a.get)
     if team == 'home_team':
         tot_game = len(data[data['home_team'] == t])
-        print("The team who have to most clean sheet at Home is:", t, "with", a[t], "clean sheets")
-        print("This is", (a[t]/tot_game)*100, "% clean sheets")
+#        print("The team who have to most clean sheet at Home is:", t, "with", a[t], "clean sheets")
+#        print("This is", (a[t]/tot_game)*100, "% clean sheets")
     if team == 'away_team':
         tot_game = len(data[data['away_team'] == t])
-        print("The team who have to most clean sheet Away is:", t, "with", a[t], "clean sheets")
-        print("This is", (a[t]/tot_game)*100, "% clean sheets")
+##        print("The team who have to most clean sheet Away is:", t, "with", a[t], "clean sheets")
+##        print("This is", (a[t]/tot_game)*100, "% clean sheets")
     return a, cs, tot_game
 
 def clean_sheet(c):
@@ -98,18 +98,18 @@ def clean_sheet(c):
             j = idx
             break
     tot_game = len(data[(data['home_team'] == cs[j]) | (data['away_team'] == cs[j])])
-    print("The team who have to most clean sheet overall is:", cs[j], "with", m, "clean sheets")
-    print("This is", (m/tot_game)*100, "% clean sheets")
+#    print("The team who have to most clean sheet overall is:", cs[j], "with", m, "clean sheets")
+#    print("This is", (m/tot_game)*100, "% clean sheets")
 
 def Home_or_Away():
     global data
-    print()
+#    print()
     win = (len(data[data['home_team_result'] == 'Win'])/(len(data))*100)
     lose = (len(data[data['home_team_result'] == 'Lose'])/(len(data))*100)
     draw = (len(data[data['home_team_result'] == 'Draw'])/(len(data))*100)
-    print("The team at home have:", win, "% chances to win")
-    print("The away team have:", lose, "% chances to win")
-    print("There is", draw, "% chances to have a draw")
+##    print("The team at home have:", win, "% chances to win")
+#    print("The away team have:", lose, "% chances to win")
+#    print("There is", draw, "% chances to have a draw")
 
 def who_win_the_most(c, team, score, data):
 #    global data
@@ -157,7 +157,7 @@ def data_for_a_certain_y(y, data):
     for idx, d in enumerate(data["date"]):
         if str(2022-y) == d[:4]:
             pastYearsData = data.iloc[1+idx:, 0:]
-    print(pastYearsData)
+#    print(pastYearsData)
     return pastYearsData
 
 def new_df(c, w, l, d, df, bl, y):
@@ -220,18 +220,18 @@ def rank(team1 = None, team2 = None):
             for g in ["Win", "Lose", "Draw"]:
                 if team1 != None and team2 != None and team1 == g1 and team2 == g2 or team1 == None and team2 == None:
                     win_rate.append(len(game[game["home_team_result"] == g]) / nb_games * 100)
-                    print(g, "HOME:", g1, "against AWAY:", g2, "\t", (len(game[game["home_team_result"] == g]) / nb_games * 100))
+#                    print(g, "HOME:", g1, "against AWAY:", g2, "\t", (len(game[game["home_team_result"] == g]) / nb_games * 100))
             if team1 != None and team2 != None and team1 == g1 and team2 == g2:
                 return win_rate
-            print()
+#            print()
 
 def main():
-    print()
+#    print()
     c = who_scored_the_most_goals()
-    print()
+#    print()
     clean_sheet(c)
     Home_or_Away()
-    print()
+#    print()
     # for t in GROUP:
     #     for tt in t:
     #         WorldCupData = data[(data['home_team'] == tt) | (data['away_team'] == tt)]
@@ -245,23 +245,37 @@ def main():
     p_w, p_l, p_d = best_country(c, pastYearsData)
     df = new_df(c, p_w, p_l, p_d, df, True, 2)
     lst = list(df.iloc[0])
-    print(len(df))
+#    print(len(df))
     pts_A = []
     pts_N = []
     for idx in range(0, len(df)):
         lst = list(df.iloc[idx])
 #        print(lst[0], "\tAVERAGE", lst[5]*3+lst[7], "\tNOW", lst[9]*3+lst[11])
-        pts_A.append(((lst[5]*3+lst[7])/lst[8])*100)
-        pts_N.append(((lst[9]*3+lst[11])/lst[12])*100)
-#    df["Last pts"] = pts_A
-#    df["Now pts"] = pts_N
+#        print(lst[8], lst[12])
+        if lst[8] != 0:
+            pts_A.append(((lst[5]*3+lst[7])/lst[8])*100)
+        else:
+            pts_A.append(1)
+        if lst[12] != 0:
+#            print(lst[12], ((lst[9]*3+lst[11])/lst[12])*100)
+            pts_N.append(((lst[9]*3+lst[11])/lst[12])*100)
+        else:
+            pts_N.append(0)
+    df["Last pts"] = pts_A
+    df["Now pts"] = pts_N
+    print(len(pts_A))
     stats = []
     s = []
     for idx, i in enumerate(pts_A):
-        stats.append(pts_N[idx] / i)
-        s.append('Cold' if stats[idx] < 0.9 else 'Hot' if stats[idx] > 1.1 else 'Regular')
+#        print(i, pts_N[idx] / i)
+        if i != 0:
+            stats.append(pts_N[idx] / i)
+            s.append('Cold' if stats[idx] < 0.9 else 'Hot' if stats[idx] > 1.1 else 'Regular')
+        else:
+            stats.append(None)
+            s.append(None)
     df["strike"] = s
-    print(df)
+#    print(df)
     worldCup = []
     for i in GROUP:
         worldCup.append(df.loc[df['TEAM'].isin(i)])
@@ -270,7 +284,7 @@ def main():
 
 
 
-    print(rank("World class", "Bad"))
+#    print(rank("World class", "Bad"))
 
 
 if __name__ == "__main__":
